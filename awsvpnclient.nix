@@ -1,12 +1,13 @@
 {
   stdenv,
   lib,
-  makeDesktopItem,
+  makeWrapper,
   fetchurl,
   dpkg,
   autoPatchelfHook,
   xdg-utils,
   lsof,
+  icu,
   libz,
   lttng-ust_2_12,
 }:
@@ -24,12 +25,14 @@ stdenv.mkDerivation rec {
   buildInputs = [
     stdenv.cc.cc.lib
     libz
+    icu
     lttng-ust_2_12
   ];
 
   nativeBuildInputs = [
     dpkg
     autoPatchelfHook
+    makeWrapper
   ];
 
   unpackPhase = ''
@@ -45,16 +48,28 @@ stdenv.mkDerivation rec {
     cp -r awsvpnclient-src/opt "$out/opt"
     cp -r awsvpnclient-src/usr/share "$out/share"
 
+    wrapProgram "$out/opt/awsvpnclient/Service/ACVC.GTK.Service" \
+      --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [libz icu lttng-ust_2_12]}"
+
+    wrapProgram "$out/opt/awsvpnclient/AWS VPN Client" \
+      --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [libz icu lttng-ust_2_12]}"
+
     mkdir -p "$out/bin"
     ln -s "$out/opt/awsvpnclient/AWS VPN Client" "$out/bin/AWS VPN Client"
+    ln -s "$out/opt/awsvpnclient/Service/ACVC.GTK.Service" "$out/bin/ACVC.GTK.Service"
 
     substituteInPlace "$out/share/applications/awsvpnclient.desktop" \
-      --replace "/opt/" "$out/opt/"
+      --replace-fail "/opt/" "$out/opt/" \
+      --replace-fail ".png" ""
+
+
+    #chmod 000 "$out/opt/awsvpnclient/SQLite.Interop.dll"
+    find "$out" -type d -exec chmod 755 {} +
 
     runHook postInstall
   '';
 
-  propagatedBuildInputs = [xdg-utils lsof];
+  propagatedBuildInputs = [xdg-utils lsof icu];
   meta = with lib; {
     description = "AWS VPN Client";
     homepage = "https://aws.amazon.com/vpn/client/";

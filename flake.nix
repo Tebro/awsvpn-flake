@@ -48,7 +48,7 @@
             wantedBy = ["multi-user.target"];
             serviceConfig = {
               Type = "simple";
-              ExecStart = "${self.packages.${pkgs.system}.awsvpnclient}/opt/awsvpnclient/Service/ACVC.GTK.Service";
+              ExecStart = "${self.packages.${pkgs.system}.awsvpnclient}/bin/ACVC.GTK.Service";
               Restart = "always";
               RestartSec = "1s";
               User = "root";
