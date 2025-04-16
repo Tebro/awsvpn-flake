@@ -10,6 +10,7 @@
   icu,
   libz,
   lttng-ust_2_12,
+  gtk3,
 }:
 stdenv.mkDerivation rec {
   pname = "awsvpnclient";
@@ -27,6 +28,7 @@ stdenv.mkDerivation rec {
     libz
     icu
     lttng-ust_2_12
+    gtk3
   ];
 
   nativeBuildInputs = [
@@ -52,7 +54,7 @@ stdenv.mkDerivation rec {
       --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [libz icu lttng-ust_2_12]}"
 
     wrapProgram "$out/opt/awsvpnclient/AWS VPN Client" \
-      --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [libz icu lttng-ust_2_12]}"
+      --prefix LD_LIBRARY_PATH : "${lib.makeLibraryPath [libz icu lttng-ust_2_12 gtk3]}"
 
     mkdir -p "$out/bin"
     ln -s "$out/opt/awsvpnclient/AWS VPN Client" "$out/bin/AWS VPN Client"
